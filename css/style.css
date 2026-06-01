@@ -1,0 +1,78 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    background: linear-gradient(135deg, #0a0e27 0%, #16213e 100%);
+    color: #00ff88;
+    overflow: hidden;
+}
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+canvas {
+    border: 3px solid #00ff88;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+/* UI Styles */
+.ui-container {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(10, 14, 39, 0.9);
+    border: 2px solid #00ff88;
+    padding: 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    z-index: 100;
+}
+
+.ui-text {
+    margin: 5px 0;
+    color: #00ff88;
+    text-shadow: 0 0 5px #00ff88;
+}
+
+.health-bar {
+    width: 200px;
+    height: 20px;
+    background: #1a1a1a;
+    border: 1px solid #00ff88;
+    margin: 5px 0;
+    overflow: hidden;
+}
+
+.health-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00ff88, #00cc6a);
+    transition: width 0.3s;
+}
+
+.inventory-ui {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(10, 14, 39, 0.9);
+    border: 2px solid #00ff88;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 300px;
+}
+
+.inventory-item {
+    padding: 5px;
+    margin: 2px 0;
+    background: rgba(0, 255, 136, 0.1);
+    border-left: 2px solid #00ff88;
+    font-size: 12px;
+}

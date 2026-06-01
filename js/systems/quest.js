@@ -8,25 +8,34 @@ class QuestSystem {
     
     startQuest(questId) {
         const quest = getQuest(questId);
-        if (!quest) {
-            console.log('❌ Quest not found!');
+        if (!quest || this.activeQuests.find(q => q.id === questId)) {
             return false;
         }
         
-        if (quest.prerequisite && !this.completedQuests.includes(quest.prerequisite)) {
-            console.log(`❌ Cannot start quest. Required: ${getQuest(quest.prerequisite).name}`);
-            return false;
+        this.activeQuests.push(JSON.parse(JSON.stringify(quest)));
+        console.log('Quest started: ' + quest.title);
+        return true;
+    }
+    
+    updateQuestProgress(questId, objectiveIndex, progress) {
+        const quest = this.activeQuests.find(q => q.id === questId);
+        if (!quest) return false;
+        
+        if (quest.objectives[objectiveIndex]) {
+            quest.objectives[objectiveIndex].progress = progress;
         }
         
-        if (!this.activeQuests.includes(questId)) {
-            this.activeQuests.push(questId);
-            player.addQuest(questId);
-            console.log(`✅ Quest Started: ${quest.name}`);
-            console.log(`   ${quest.description}`);
-            console.log(`   Objectives:`);
-            quest.objectives.forEach((obj, i) => {
-                console.log(`   ${i + 1}. ${obj}`);
-            });
+        return this.checkQuestCompletion(questId);
+    }
+    
+    checkQuestCompletion(questId) {
+        const quest = this.activeQuests.find(q => q.id === questId);
+        if (!quest) return false;
+        
+        const allComplete = quest.objectives.every(obj => obj.progress >= obj.count);
+        
+        if (allComplete && !quest.completed) {
+            this.completeQuest(questId);
             return true;
         }
         
@@ -34,77 +43,34 @@ class QuestSystem {
     }
     
     completeQuest(questId) {
-        const quest = getQuest(questId);
-        if (!quest) return false;
+        const questIndex = this.activeQuests.findIndex(q => q.id === questId);
+        if (questIndex === -1) return false;
         
-        const index = this.activeQuests.indexOf(questId);
-        if (index > -1) {
-            this.activeQuests.splice(index, 1);
-            this.completedQuests.push(questId);
-            player.completeQuest(questId);
+        const quest = this.activeQuests[questIndex];
+        quest.completed = true;
+        
+        // Apply rewards
+        if (quest.rewards) {
+            player.gainXP(quest.rewards.xp || 0);
+            player.credits += quest.rewards.credits || 0;
             
-            console.log(`\n🎁 QUEST COMPLETED: ${quest.name}`);
-            console.log(`   Reward: ${quest.reward.exp} EXP`);
-            console.log(`   Reward: ${quest.reward.coins} Coins`);
-            if (quest.reward.items) {
-                console.log(`   Items: ${quest.reward.items.join(', ')}`);
+            if (quest.rewards.items) {
+                quest.rewards.items.forEach(itemId => {
+                    inventorySystem.addItem(itemId);
+                });
             }
-            
-            return true;
         }
         
-        return false;
-    }
-    
-    abandonQuest(questId) {
-        const quest = getQuest(questId);
-        const index = this.activeQuests.indexOf(questId);
+        this.completedQuests.push(quest);
+        this.activeQuests.splice(questIndex, 1);
         
-        if (index > -1) {
-            this.activeQuests.splice(index, 1);
-            console.log(`❌ Quest Abandoned: ${quest.name}`);
-            return true;
-        }
-        
-        return false;
+        console.log('Quest completed: ' + quest.title);
+        return true;
     }
     
     getActiveQuests() {
-        return this.activeQuests.map(id => getQuest(id));
-    }
-    
-    getCompletedQuests() {
-        return this.completedQuests.map(id => getQuest(id));
-    }
-    
-    printActiveQuests() {
-        console.log(`\n📋 ACTIVE QUESTS (${this.activeQuests.length})`);
-        
-        this.getActiveQuests().forEach((quest, i) => {
-            console.log(`\n   ${i + 1}. ${quest.name}`);
-            console.log(`      ${quest.description}`);
-            console.log(`      Objectives:`);
-            quest.objectives.forEach(obj => {
-                console.log(`         ☐ ${obj}`);
-            });
-        });
-    }
-    
-    printCompletedQuests() {
-        console.log(`\n✅ COMPLETED QUESTS (${this.completedQuests.length})`);
-        
-        this.getCompletedQuests().forEach((quest, i) => {
-            console.log(`   ${i + 1}. ${quest.name}`);
-        });
-    }
-    
-    getQuestsFromNPC(npcId) {
-        const npc = getNPC(npcId);
-        if (!npc || !npc.quests) return [];
-        
-        return npc.quests.map(id => getQuest(id));
+        return this.activeQuests;
     }
 }
 
-// Create global quest system
-let questSystem = new QuestSystem();
+const questSystem = new QuestSystem();

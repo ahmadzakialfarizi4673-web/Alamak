@@ -2,17 +2,16 @@
 
 class BootScene extends Phaser.Scene {
     constructor() {
-        super('Boot');
+        super({ key: 'BootScene' });
     }
     
     preload() {
         // Load assets here if needed
-        console.log('🔧 Loading assets...');
+        console.log('Loading assets...');
     }
     
     create() {
-        console.log('✅ Boot scene initialized');
-        // Start menu scene
-        this.scene.start('Menu');
+        console.log('Boot scene created');
+        this.scene.start('MenuScene');
     }
 }
